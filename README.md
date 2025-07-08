@@ -1,5 +1,8 @@
-# AWS MULTI TIER ARCHITECTURE USING TERRAFORM
-## This guide outlines the step-by-step deployment of a scalable and secure multi-tier architecture on AWS using Terraform. This approach leverages Infrastructure as Code to automate cloud infrastructure provisioning and minimize manual errors.
+# AWS DISASTER RECOVERY MULTI TIER ARCHITECTURE USING TERRAFORM
+## This guide outlines the step-by-step deployment of a scalable and secure multi-tier architecture on AWS using Terraform. This approach leverages Infrastructure as Code to automate cloud infrastructure provisioning and minimize manual errors.The code is deployed in two different regions to maintain disaster recovery constraint.
+
+![image](https://github.com/user-attachments/assets/74773078-f5d1-4f05-9387-32da616a6107)
+
 ✅ Core AWS Services Used
 Amazon EC2 (Elastic Compute Cloud) for running the application instances using launch templates.
 
@@ -30,13 +33,17 @@ Amazon EC2 (Elastic Compute Cloud) for running the application instances using l
 9.Amazon EC2 (Elastic Compute Cloud)
 
                  For running the application instances using launch templates.
-10.Terraform
+10. Route 53
+    
+                    providing dns to the deployed web app and used to achive disater recovery by failover routing schema  
+11.Terraform
 
                   For provisioning, managing, and automating the entire AWS infrastructure
 ## Step 1: Selecting the AWS Region
 
 The AWS region is the geographical location where your resources are hosted. A well-chosen region ensures low latency, regulatory compliance, and service availability.
-Deployed In: us-east-1 (Northern Virginia)
+Deployed In: us-east-1 (Northern Virginia) # as primary region for D.R
+Deployed In: ap-south-1 (Mumbai) # backup region 
 
 ## Step 2: Creating the Virtual Private Cloud
  VPC is set up as the isolated networking layer for all AWS resources.
@@ -44,26 +51,33 @@ VPC Configuration:
 CIDR: 10.0.0.0/16
 Features: DNS support and DNS hostnames enabled
 This isolated network enables full control over networking and security.
+provider
 
+     "aws" {
+
+                    region="us-east-1"  
+     }
 ## Step 3: Designing Subnets for Tiered Architecture
-The VPC is divided into two availability zones subnets to main high availability
-Public Subnets (for load balancer and jump boxes):
+The VPC is divided into two availability zones & each subnet in each AZ to main high availability 
+
+**`Public Subnets(for load balancer and jump boxes):`**
 
 AZ-a: 10.0.1.0/24
 
 AZ-b: 10.0.2.0/24
 
-Private Subnets (for backend and database tiers):
+**`Private Subnets (for backend and database tiers):`**
 
 AZ-a: 10.0.3.0/24, 10.0.5.0/24
 
 AZ-b: 10.0.4.0/24, 10.0.6.0/24
+
 ## Step 4: Configuring Internet Access
 An Internet Gateway is created and linked to the VPC for outbound internet access from public subnets.
 
 Routing Setup:
 
-Public route table has IGW route
+Public route table has IGW route and associate public subnets to make it access to internet.
 Private subnets have internal routing only
 
 Optional: Introduce NAT Gateway for private subnet internet access. In this case we are not using any.
@@ -73,43 +87,61 @@ An ALB is deployed to handle HTTP traffic and direct it to backend servers hoste
 
 ALB Setup:
 Listens on HTTP port 80
-Registers instances via target group
+Registers instances via target group(create a target group as "INSTANCE RESOURCE")
+
 Exposes DNS for frontend users
+
 ## Step 6: Setting up Auto Scaling Group
-ASG ensures continuous availability by automatically launching or terminating instances.
+ASG ensures continuous availability by automatically launching or terminating instances based on health checks.
 
 Configuration:
 
 Launch template specifies AMI, instance type, user data
-
 Health checks determine instance replacement
-
 Integrated with target group of ALB
+
+         health_check_type = "EC2"
+
+     tag {
+    key                 = "Name"
+    value               = "web-asg-instance"
+    propagate_at_launch = true
+    }
+  
+    lifecycle {
+      create_before_destroy = true
+    }
+use create _before_destroy lifecycle to maintain instances up&running before any previous instance delete accidentally.      
+
+
 ## Step 7: Launch Template and Bootstrapping
 
-Launch template includes a shell script that configures the EC2 instance on boot.use script.sh file to load user data
-
-##Step 8: Terraform Project Structure
+Launch template includes a shell script that configures the EC2 instance on boot.
+Use script.sh file to load user data
+    
+      user_data = filebase64("script.sh")
+     
+## Step 8: Terraform Project Structure
 
 Terraform scripts are organized for clarity and modularization.
 
-Key Files:
+1. Key Files:
 
-main.tf: Resource composition
+        main.tf: Resource composition
 
-vpc.tf: Network resources
+2.vpc.tf: Network resources
 
-alb.tf: Load balancer and listeners
+    alb.tf: Load balancer and listeners
 
-asg.tf: Auto Scaling configuration
+3.asg.tf: Auto Scaling configuration
 
-launch_template.tf: Instance launch template
+    launch_template.tf: Instance launch template
 
-variables.tf: Input definitions
+4. variables.tf: Input definitions
 
-outputs.tf: Resulting outputs (e.g., ALB DNS)
+        outputs.tf: Resulting outputs (e.g., ALB DNS)
 
-provider.tf: AWS region and authentication
+5.provider.tf: AWS region and authentication
 
 ## Final Notes
 
