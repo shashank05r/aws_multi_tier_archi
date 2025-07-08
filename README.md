@@ -142,6 +142,9 @@ Terraform scripts are organized for clarity and modularization.
 4. variables.tf: Input definitions
 
         outputs.tf: Resulting outputs (e.g., ALB DNS)
+5. securtiygroups.tf: Define the sg rule to each services 
+
+       securtiygroups.tf HTTP traffic flow
 
 5.provider.tf: AWS region and authentication
 
@@ -153,8 +156,7 @@ Scalability: ASG adjusts to traffic demands
 
 Automation: Complete provisioning via Terraform enhances DevOps practices
 
-Extensions: Add RDS MySQL/Aurora, NAT Gateway, Bastion host, and monitoring
 
-##Summary
+## Summary
 
-This project demonstrates a production-ready 3-tier AWS environment built entirely through Terraform. The architecture provides flexibility, automation, and resilience suitable for modern application workloads.
+This project demonstrates a production-ready in AWS environment built entirely through Terraform. The architecture provides flexibility, automation, and resilience suitable for modern application workloads.
