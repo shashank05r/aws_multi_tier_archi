@@ -1,7 +1,9 @@
 # AWS DISASTER RECOVERY MULTI TIER ARCHITECTURE USING TERRAFORM
 ## This guide outlines the step-by-step deployment of a scalable and secure multi-tier architecture on AWS using Terraform. This approach leverages Infrastructure as Code to automate cloud infrastructure provisioning and minimize manual errors.The code is deployed in two different regions to maintain disaster recovery constraint.
 
-![image](https://github.com/user-attachments/assets/74773078-f5d1-4f05-9387-32da616a6107)
+<img src="https://github.com/user-attachments/assets/7cf1f428-c944-4fbb-8d03-7f3eef570b97" width="500"/>
+
+
 
 ✅ Core AWS Services Used
 Amazon EC2 (Elastic Compute Cloud) for running the application instances using launch templates.
