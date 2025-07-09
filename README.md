@@ -122,8 +122,16 @@ Launch template includes a shell script that configures the EC2 instance on boot
 Use script.sh file to load user data
     
       user_data = filebase64("script.sh")
-     
-## Step 8: Terraform Project Structure
+## Step 8: Configure Route 53.
+In this step, create a public hosted zone in Route 53, and update the name servers
+> If the domain is purchased from route 53, then create only hosted zone as name server update itself
+> If the domain is purchased from other website, update the hosted zone name servers in other website ans wait 5min-30min
+After that, create a A record and select the routing policy as failover
+  a. choose primary as one region and 
+  b. secondary as another region and
+map your respective ALB to their regions domain url. This is alias record.
+Now access your domain http://sub-domainname.domainname
+## Step 9: Terraform Project Structure
 
 Terraform scripts are organized for clarity and modularization.
 
